@@ -171,7 +171,11 @@ class App extends Component {
                 keepMounted: true // Better open performance on mobile.
               }}
             >
-              <LocationsDrawer locations={locations} />
+              <LocationsDrawer
+                populateInfoWindow={this.populateInfoWindow}
+                infoWindow={this.state.infowindow}
+                locations={locations}
+              />
             </Drawer>
           </Hidden>
           <Hidden smDown implementation="css">
