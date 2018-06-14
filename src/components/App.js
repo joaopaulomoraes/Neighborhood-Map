@@ -175,6 +175,7 @@ class App extends Component {
                 populateInfoWindow={this.populateInfoWindow}
                 infoWindow={this.state.infowindow}
                 locations={locations}
+                handleDrawerToggle={this.handleDrawerToggle}
               />
             </Drawer>
           </Hidden>
