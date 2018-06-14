@@ -78,6 +78,18 @@ class App extends Component {
       },
       zoom: 12
     })
+
+    const udacity = {
+      lat: 37.399913,
+      lng: -122.108363
+    }
+
+    //const marker =
+    new google.maps.Marker({
+      position: udacity,
+      map: map,
+      title: 'Udacity'
+    })
   }
 
   handleDrawerToggle = () => {
