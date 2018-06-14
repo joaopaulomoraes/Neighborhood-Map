@@ -8,18 +8,16 @@ import {
 import Drawer from '@material-ui/core/Drawer'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
-import List from '@material-ui/core/List'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
-import ListItemText from '@material-ui/core/ListItemText'
 import Typography from '@material-ui/core/Typography'
 import IconButton from '@material-ui/core/IconButton'
 import Hidden from '@material-ui/core/Hidden'
-import Divider from '@material-ui/core/Divider'
 import MenuIcon from '@material-ui/icons/Menu'
-import Place from '@material-ui/icons/Place'
 import Theme from '../utils/theme'
-import { loadMapJS } from '../utils/helpers'
+import {
+  loadMapJS,
+  locations
+} from '../utils/helpers'
+import LocationsDrawer from './LocationsDrawer'
 
 const drawerWidth = 320
 
@@ -58,38 +56,79 @@ const styles = theme => ({
   }
 })
 
+const map = [], markers = []
+
 class App extends Component {
   state = {
+    locations: [],
+    infowindow: [],
     mobileOpen: false
   }
 
   componentDidMount() {
+    this.setState({ locations })
     window.initMap = this.initMap
-    loadMapJS("https://maps.googleapis.com/maps/api/js?key=AIzaSyCacmIGcWsolGnXLp71cBM_My9axyprocM&callback=initMap")
+    loadMapJS("https://maps.googleapis.com/maps/api/js?key=AIzaSyCTUTg0Cyq-SghJ6RjtAECKNwJhVbe6mRM&callback=initMap")
   }
 
-  initMap() {
+  initMap = () => {
     const google = window.google
-    const map = new google.maps.Map(document.getElementById("map"), {
+    const { locations } = this.state
+
+    const map = new google.maps.Map(document.getElementById('map'), {
       center: {
-        // Silicon Valley, CA, USA
-        lat: 37.387474,
-        lng: -122.057543
+        lat: -22.8841808,
+        lng: -48.4441653
       },
       zoom: 12
     })
+  
+    const largeInfowindow = new google.maps.InfoWindow()
+    const bounds = new google.maps.LatLngBounds()
+    
+    let apiLocations = []
+    for (let i = 0; i < locations.length; i++) {
+      
+      const position = locations[i].location
+      const title = locations[i].title
 
-    const udacity = {
-      lat: 37.399913,
-      lng: -122.108363
+      const marker = new google.maps.Marker({
+        map: map,
+        position: position,
+        title: title,
+        animation: google.maps.Animation.DROP,
+        id: i
+      })
+
+      locations[i].marker = marker
+      apiLocations.push(locations[i])
+      
+      this.setState({
+        locations: apiLocations,
+        infowindow: largeInfowindow
+      })
+
+      markers.push(marker)
+
+      marker.addListener('click', () => 
+        this.populateInfoWindow(marker, this.state.infowindow)
+      )
+      bounds.extend(markers[i].position)
     }
 
-    //const marker =
-    new google.maps.Marker({
-      position: udacity,
-      map: map,
-      title: 'Udacity'
-    })
+    map.fitBounds(bounds)
+  }
+
+  populateInfoWindow = (marker, infowindow) => {
+    if (infowindow.marker !== marker) {
+      infowindow.marker = marker
+      infowindow.setContent('<div>' + marker.title + '</div>')
+      infowindow.open(map, marker)
+  
+      infowindow.addListener('closeclick', function(){
+        infowindow.setMarker = null
+      })
+    }
   }
 
   handleDrawerToggle = () => {
@@ -98,21 +137,7 @@ class App extends Component {
 
   render() {
     const { classes, theme } = this.props
-
-    const drawer = (
-      <div>
-        <div className={classes.toolbar} />
-        <Divider />
-        <List>
-          <ListItem button>
-            <ListItemIcon>
-              <Place />
-            </ListItemIcon>
-            <ListItemText primary="Place" />
-          </ListItem>
-        </List>
-      </div>
-    )
+    const { locations } = this.state
 
     return (
       <div className={classes.root}>
@@ -146,7 +171,7 @@ class App extends Component {
                 keepMounted: true // Better open performance on mobile.
               }}
             >
-              {drawer}
+              <LocationsDrawer locations={locations} />
             </Drawer>
           </Hidden>
           <Hidden smDown implementation="css">
@@ -157,7 +182,11 @@ class App extends Component {
                 paper: classes.drawerPaper,
               }}
             >
-              {drawer}
+              <LocationsDrawer
+                populateInfoWindow={this.populateInfoWindow}
+                infoWindow={this.state.infowindow}
+                locations={locations}
+              />
             </Drawer>
           </Hidden>
           <main className={classes.content}>
