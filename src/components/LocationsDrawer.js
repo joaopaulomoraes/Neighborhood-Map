@@ -5,18 +5,11 @@ import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
+import Input from '@material-ui/core/Input'
 import Place from '@material-ui/icons/Place'
 
-const drawerWidth = 320
-
 const styles = theme => ({
-  toolbar: theme.mixins.toolbar,
-  drawerPaper: {
-    width: drawerWidth,
-    [theme.breakpoints.up('md')]: {
-      position: 'relative'
-    }
-  }
+  toolbar: theme.mixins.toolbar
 })
 
 const LocationsDrawer = props => {
@@ -25,11 +18,21 @@ const LocationsDrawer = props => {
     locations,
     populateInfoWindow,
     infoWindow,
-    handleDrawerToggle
+    handleDrawerToggle,
+    query,
+    filterMarkers
   } = props
-
+  
   return (
     <div id="locations-drawer">
+      <Input
+        placeholder="Filter place"
+        defaultValue={query}
+        onChange={(e) => filterMarkers(e.target.value)}
+        inputProps={{
+          'aria-label': 'Description'
+        }}
+      />
       <div className={classes.toolbar} />
         {locations && locations.map((location, key) => (
           <div key={key}>
