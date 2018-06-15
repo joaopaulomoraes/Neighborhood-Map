@@ -66,6 +66,7 @@ class App extends Component {
     locations: [],
     infowindow: [],
     query: "",
+    prevmarker: null,
     mobileOpen: false
   }
 
@@ -124,6 +125,11 @@ class App extends Component {
 
   populateInfoWindow = (marker, infowindow) => {
     marker.setAnimation(window.google.maps.Animation.BOUNCE)
+    if (this.state.prevmarker) {
+      this.state.prevmarker.setAnimation(null)
+    }
+
+    this.setState({ prevmarker: marker })
 
     if (infowindow.marker !== marker) {
       infowindow.marker = marker
@@ -132,6 +138,9 @@ class App extends Component {
   
       infowindow.addListener('closeclick', function () {
         infowindow.setMarker = null
+        this.setState({
+          prevmarker: null
+        })
         marker.setAnimation(null)
       })
     }
