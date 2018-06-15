@@ -15,9 +15,12 @@ import MenuIcon from '@material-ui/icons/Menu'
 import Theme from '../utils/theme'
 import {
   loadMapJS,
+  mapStyles,
   locations
 } from '../utils/helpers'
 import LocationsDrawer from './LocationsDrawer'
+import escapeRegExp from 'escape-string-regexp'
+import sortBy from 'sort-by'
 
 const drawerWidth = 320
 
@@ -56,26 +59,27 @@ const styles = theme => ({
   }
 })
 
-const map = [], markers = []
-
 class App extends Component {
   state = {
+    map: {},
+    markers: [],
     locations: [],
     infowindow: [],
+    query: "",
     mobileOpen: false
   }
 
   componentDidMount() {
-    this.setState({ locations })
     window.initMap = this.initMap
     loadMapJS("https://maps.googleapis.com/maps/api/js?key=AIzaSyCTUTg0Cyq-SghJ6RjtAECKNwJhVbe6mRM&callback=initMap")
   }
 
   initMap = () => {
     const google = window.google
-    const { locations } = this.state
+    const { markers } = this.state
 
     const map = new google.maps.Map(document.getElementById('map'), {
+      styles: mapStyles,
       center: {
         lat: -22.8841808,
         lng: -48.4441653
@@ -84,51 +88,66 @@ class App extends Component {
     })
   
     const largeInfowindow = new google.maps.InfoWindow()
-    const bounds = new google.maps.LatLngBounds()
     
     let apiLocations = []
-    for (let i = 0; i < locations.length; i++) {
+    locations.forEach(location => {
       
-      const position = locations[i].location
-      const title = locations[i].title
+      const position = location.location
+      const title = location.title
 
       const marker = new google.maps.Marker({
         map: map,
         position: position,
         title: title,
-        animation: google.maps.Animation.DROP,
-        id: i
+        animation: google.maps.Animation.DROP
       })
 
-      locations[i].marker = marker
-      apiLocations.push(locations[i])
+      location.marker = marker
+      apiLocations.push(location)
       
       this.setState({
-        locations: apiLocations,
-        infowindow: largeInfowindow
+        infowindow: largeInfowindow,
+        markers: markers.push(marker)
       })
 
-      markers.push(marker)
-
-      marker.addListener('click', () => 
+      marker.addListener('click', () =>
         this.populateInfoWindow(marker, this.state.infowindow)
       )
-      bounds.extend(markers[i].position)
-    }
+    })
+
+    const bounds = new google.maps.LatLngBounds()
+    markers.forEach(marker => bounds.extend(marker.position))
 
     map.fitBounds(bounds)
+    this.setState({ map, locations: apiLocations })
   }
 
   populateInfoWindow = (marker, infowindow) => {
+    marker.setAnimation(window.google.maps.Animation.BOUNCE)
+
     if (infowindow.marker !== marker) {
       infowindow.marker = marker
       infowindow.setContent('<div>' + marker.title + '</div>')
-      infowindow.open(map, marker)
+      infowindow.open(this.state.map, marker)
   
-      infowindow.addListener('closeclick', function(){
+      infowindow.addListener('closeclick', function () {
         infowindow.setMarker = null
+        marker.setAnimation(null)
       })
     }
+  }
+
+  filterMarkers = query => {
+    this.setState({ query: query.toLowerCase() })
+
+    this.state.locations.forEach((location) => {
+      if (location.title.toLowerCase().indexOf(query.toLowerCase()) > -1) {
+        location.marker.setVisible(true)
+        locations.push(location)
+      } else {
+          location.marker.setVisible(false)
+        }
+      })
   }
 
   handleDrawerToggle = () => {
@@ -137,7 +156,16 @@ class App extends Component {
 
   render() {
     const { classes, theme } = this.props
-    const { locations } = this.state
+    const { locations, query } = this.state
+
+    let filteredLocations
+    if (query) {
+      const match = new RegExp(escapeRegExp(query), 'i')
+      filteredLocations = locations.filter(location => match.test(location.title))
+    } else {
+      filteredLocations = locations
+    }
+    filteredLocations.sort(sortBy('title'))
 
     return (
       <div className={classes.root}>
@@ -174,8 +202,9 @@ class App extends Component {
               <LocationsDrawer
                 populateInfoWindow={this.populateInfoWindow}
                 infoWindow={this.state.infowindow}
-                locations={locations}
+                locations={filteredLocations}
                 handleDrawerToggle={this.handleDrawerToggle}
+                filterMarkers={this.filterMarkers}
               />
             </Drawer>
           </Hidden>
@@ -190,7 +219,8 @@ class App extends Component {
               <LocationsDrawer
                 populateInfoWindow={this.populateInfoWindow}
                 infoWindow={this.state.infowindow}
-                locations={locations}
+                locations={filteredLocations}
+                filterMarkers={this.filterMarkers}
               />
             </Drawer>
           </Hidden>
