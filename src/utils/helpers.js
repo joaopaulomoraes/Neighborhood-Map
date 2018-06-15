@@ -51,7 +51,7 @@ export const locations = [
     }
   },
   {
-    title: 'Pessin',
+    title: 'A Formiguinha',
     location: {
       lat: -22.8837139,
       lng: -48.4405039
