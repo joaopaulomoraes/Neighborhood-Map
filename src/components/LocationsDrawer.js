@@ -8,7 +8,7 @@ import ListItemText from '@material-ui/core/ListItemText'
 import Input from '@material-ui/core/Input'
 import Place from '@material-ui/icons/Place'
 
-const styles = theme => ({
+const styles = () => ({
   search: {
     paddingTop: 16,
     paddingBottom: 16,
@@ -22,8 +22,7 @@ const LocationsDrawer = props => {
   const {
     classes,
     locations,
-    populateInfoWindow,
-    infoWindow,
+    openInfoWindow,
     query,
     filterMarkers
   } = props
@@ -43,7 +42,7 @@ const LocationsDrawer = props => {
           <div key={key}>
             <Divider />
             <List>
-              <ListItem button onClick={() => populateInfoWindow(location.marker, infoWindow)}>
+              <ListItem button onClick={() => openInfoWindow(location.marker)}>
                 <ListItemIcon>
                   <Place />
                 </ListItemIcon>
