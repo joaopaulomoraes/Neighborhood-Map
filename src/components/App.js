@@ -106,14 +106,22 @@ class App extends Component {
       location.marker = marker
       apiLocations.push(location)
       
+      google.maps.event.addListener(largeInfowindow, 'closeclick', () => {
+        this.closeInfoWindow()
+      })
+
       this.setState({
         infowindow: largeInfowindow,
         markers: markers.push(marker)
       })
 
-      marker.addListener('click', () =>
-        this.populateInfoWindow(marker, this.state.infowindow)
-      )
+      marker.addListener('click', () => {
+        this.openInfoWindow(marker)
+      })
+
+      google.maps.event.addListener(map, 'click', () => {
+        this.closeInfoWindow()
+      })
     })
 
     const bounds = new google.maps.LatLngBounds()
@@ -123,29 +131,56 @@ class App extends Component {
     this.setState({ map, locations: apiLocations })
   }
 
-  populateInfoWindow = (marker, infowindow) => {
+  openInfoWindow = marker => {
+    this.closeInfoWindow()
+    this.state.infowindow.open(this.state.map, marker)
     marker.setAnimation(window.google.maps.Animation.BOUNCE)
-    if (this.state.prevmarker) {
-      this.state.prevmarker.setAnimation(null)
-    }
-
     this.setState({ prevmarker: marker })
+    this.state.infowindow.setContent('Loading...')
+    this.getLocateDetails(marker)
+  }
 
-    if (infowindow.marker !== marker) {
-      infowindow.marker = marker
-      infowindow.setContent('<div>' + marker.title + '</div>')
-      infowindow.open(this.state.map, marker)
-  
-      infowindow.addListener('closeclick', function () {
-        infowindow.setMarker = null
-        marker.setAnimation(null)
+  closeInfoWindow = () => {
+    if (this.state.prevmarker) this.state.prevmarker.setAnimation(null)
+    this.setState({ prevmarker: null })
+    this.state.infowindow.close()
+  }
+
+  getLocateDetails = marker => {
+    var self = this
+    var clientId = 'BWTXXC02BX1H0330CQYTEMFMTYNE3LJXBR25JE1G3WIPGM1R'
+    var clientSecret = 'GGLM4LYCZA2XEBO5CSOMVDZTUMJNLCHUT0JYN4YZOSOAIP4C'
+    var url = `https://api.foursquare.com/v2/venues/search?client_id=${clientId}&client_secret=${clientSecret}&v=20130815&ll=${marker.getPosition().lat()},${marker.getPosition().lng()}&lim it=1`
+    fetch(url)
+      .then(response => {
+        if (response.status !== 200) {
+          self.state.infowindow.setContent("Sorry data can't be loaded")
+          return
+        }
+
+        response.json().then(data => {
+          var location = data.response.venues[0]
+          var verified = `
+            <b>Name</b>: ${location.name}<br>
+            <b>Verified Location: </b> ${location.verified ? 'Yes' : 'No'}<br>
+            <b>Number of CheckIn: </b> ${location.stats.checkinsCount} <br>
+            <b>Number of Users: </b> ${location.stats.usersCount}<br>
+            <b>Number of Tips: </b> ${location.stats.tipCount}<br>
+            <p>
+              <a href="https://foursquare.com/v/${location.id}" target="_blank">More details on Foursquare</a>
+            </p>`
+          self.state.infowindow.setContent(
+            verified
+          )
+        })
       })
-    }
-
-    this.handleDrawerToggle()
+      .catch(() => {
+        self.state.infowindow.setContent("Sorry data can't be loaded")
+      })
   }
 
   filterMarkers = query => {
+    this.closeInfoWindow()
     this.setState({ query: query.toLowerCase() })
 
     this.state.locations.forEach((location) => {
@@ -153,9 +188,9 @@ class App extends Component {
         location.marker.setVisible(true)
         locations.push(location)
       } else {
-          location.marker.setVisible(false)
-        }
-      })
+        location.marker.setVisible(false)
+      }
+    })
   }
 
   handleDrawerToggle = () => {
@@ -208,8 +243,7 @@ class App extends Component {
               }}
             >
               <LocationsDrawer
-                populateInfoWindow={this.populateInfoWindow}
-                infoWindow={this.state.infowindow}
+                openInfoWindow={this.openInfoWindow}
                 locations={filteredLocations}
                 filterMarkers={this.filterMarkers}
               />
@@ -224,8 +258,7 @@ class App extends Component {
               }}
             >
               <LocationsDrawer
-                populateInfoWindow={this.populateInfoWindow}
-                infoWindow={this.state.infowindow}
+                openInfoWindow={this.openInfoWindow}
                 locations={filteredLocations}
                 filterMarkers={this.filterMarkers}
               />
