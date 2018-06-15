@@ -141,6 +141,8 @@ class App extends Component {
         marker.setAnimation(null)
       })
     }
+
+    this.handleDrawerToggle()
   }
 
   filterMarkers = query => {
@@ -209,7 +211,6 @@ class App extends Component {
                 populateInfoWindow={this.populateInfoWindow}
                 infoWindow={this.state.infowindow}
                 locations={filteredLocations}
-                handleDrawerToggle={this.handleDrawerToggle}
                 filterMarkers={this.filterMarkers}
               />
             </Drawer>

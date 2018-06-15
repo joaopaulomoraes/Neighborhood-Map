@@ -18,7 +18,6 @@ const LocationsDrawer = props => {
     locations,
     populateInfoWindow,
     infoWindow,
-    handleDrawerToggle,
     query,
     filterMarkers
   } = props
@@ -38,7 +37,7 @@ const LocationsDrawer = props => {
           <div key={key}>
             <Divider />
             <List>
-              <ListItem button onClick={() => (populateInfoWindow(location.marker, infoWindow), handleDrawerToggle !== undefined ? handleDrawerToggle() : null)}>
+              <ListItem button onClick={() => populateInfoWindow(location.marker, infoWindow)}>
                 <ListItemIcon>
                   <Place />
                 </ListItemIcon>
