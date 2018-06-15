@@ -75,6 +75,10 @@ class App extends Component {
     loadMapJS("https://maps.googleapis.com/maps/api/js?key=AIzaSyCTUTg0Cyq-SghJ6RjtAECKNwJhVbe6mRM&callback=initMap")
   }
 
+  /**
+   * @description Init the Google Map
+   * @returns {map, locations, markers, infowindow} Updated core state
+   */
   initMap = () => {
     const google = window.google
     const { markers } = this.state
@@ -131,6 +135,11 @@ class App extends Component {
     this.setState({ map, locations: apiLocations })
   }
 
+  /**
+   * @description Open a info window in map
+   * @param {object} marker
+   * @returns {marker} Details with general informations
+   */
   openInfoWindow = marker => {
     this.closeInfoWindow()
     this.state.infowindow.open(this.state.map, marker)
@@ -140,12 +149,20 @@ class App extends Component {
     this.getLocateDetails(marker)
   }
 
+  /**
+   * @description Close a info window in map
+   */
   closeInfoWindow = () => {
     if (this.state.prevmarker) this.state.prevmarker.setAnimation(null)
     this.setState({ prevmarker: null })
     this.state.infowindow.close()
   }
 
+  /**
+   * @description Generate all details in info window (specific)
+   * @param {object} marker
+   * @returns {component} All details with informations (Foursquare API)
+   */
   getLocateDetails = marker => {
     var self = this
     var clientId = 'BWTXXC02BX1H0330CQYTEMFMTYNE3LJXBR25JE1G3WIPGM1R'
@@ -179,6 +196,11 @@ class App extends Component {
       })
   }
 
+  /**
+   * @description Filter locations based in query search
+   * @param {string} query
+   * @returns {state} Updated locations state
+   */
   filterMarkers = query => {
     this.closeInfoWindow()
     this.setState({ query: query.toLowerCase() })
