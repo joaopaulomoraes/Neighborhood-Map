@@ -26,10 +26,12 @@ Serve with hot reload at http://localhost:3000.
 yarn start
 ```
 
+**Demo**: [https://neighborhood-map-kagzjgkibt.now.sh](https://neighborhood-map-kagzjgkibt.now.sh)
+
 ### APIs
 
 - [Google Maps](https://developers.google.com/maps)
-- [Foursquare](https://developer.foursquare.com)
+- [Foursquare](https://developer.foursquare.com/)
 
 ## License
 
