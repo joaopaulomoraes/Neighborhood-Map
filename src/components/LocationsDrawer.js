@@ -9,7 +9,13 @@ import Input from '@material-ui/core/Input'
 import Place from '@material-ui/icons/Place'
 
 const styles = theme => ({
-  toolbar: theme.mixins.toolbar
+  search: {
+    paddingTop: 16,
+    paddingBottom: 16,
+    paddingLeft: 35,
+    paddingRight: 35,
+    width: '100vh'
+  }
 })
 
 const LocationsDrawer = props => {
@@ -25,6 +31,7 @@ const LocationsDrawer = props => {
   return (
     <div id="locations-drawer">
       <Input
+        className={classes.search}
         placeholder="Filter place"
         defaultValue={query}
         onChange={(e) => filterMarkers(e.target.value)}
@@ -32,7 +39,6 @@ const LocationsDrawer = props => {
           'aria-label': 'Description'
         }}
       />
-      <div className={classes.toolbar} />
         {locations && locations.map((location, key) => (
           <div key={key}>
             <Divider />
