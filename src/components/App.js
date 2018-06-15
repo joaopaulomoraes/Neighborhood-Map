@@ -138,9 +138,6 @@ class App extends Component {
   
       infowindow.addListener('closeclick', function () {
         infowindow.setMarker = null
-        this.setState({
-          prevmarker: null
-        })
         marker.setAnimation(null)
       })
     }
